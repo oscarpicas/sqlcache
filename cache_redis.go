@@ -2,12 +2,13 @@ package sqlcache
 
 import (
 	"context"
+	"errors"
 	"time"
 
 	"github.com/redis/go-redis/v9"
 	"github.com/vmihailenco/msgpack/v4"
 
-	"github.com/prashanthpai/sqlcache/cache"
+	"github.com/oscarpicas/sqlcache/cache"
 )
 
 // Redis implements cache.Cacher interface to use redis as backend with
@@ -21,14 +22,14 @@ type Redis struct {
 // which represents whether key exists or not and an error.
 func (r *Redis) Get(ctx context.Context, key string) (*cache.Item, bool, error) {
 	b, err := r.c.Get(ctx, r.keyPrefix+key).Bytes()
-	switch err {
-	case nil:
+	switch {
+	case err == nil:
 		var item cache.Item
 		if err := msgpack.Unmarshal(b, &item); err != nil {
 			return nil, true, err
 		}
 		return &item, true, nil
-	case redis.Nil:
+	case errors.Is(err, redis.Nil):
 		return nil, false, nil
 	default:
 		return nil, false, err
@@ -43,6 +44,12 @@ func (r *Redis) Set(ctx context.Context, key string, item *cache.Item, ttl time.
 	}
 
 	_, err = r.c.Set(ctx, r.keyPrefix+key, b, ttl).Result()
+	return err
+}
+
+// Invalidate removes the item from redis.
+func (r *Redis) Invalidate(ctx context.Context, key string) error {
+	_, err := r.c.Del(ctx, r.keyPrefix+key).Result()
 	return err
 }
 

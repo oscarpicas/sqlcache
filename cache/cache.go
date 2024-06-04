@@ -1,3 +1,5 @@
+//go:generate mockery --name=Cacher --case=underscore --output=../mocks
+
 package cache
 
 import (
@@ -21,4 +23,6 @@ type Cacher interface {
 	Get(ctx context.Context, key string) (*Item, bool, error)
 	// Set sets the item into cache with the given TTL.
 	Set(ctx context.Context, key string, item *Item, ttl time.Duration) error
+	// Invalidate removes the item from cache.
+	Invalidate(ctx context.Context, key string) error
 }

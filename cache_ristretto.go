@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/prashanthpai/sqlcache/cache"
+	"github.com/oscarpicas/sqlcache/cache"
 
 	"github.com/dgraph-io/ristretto"
 )
@@ -36,6 +36,12 @@ func (r *Ristretto) Get(ctx context.Context, key string) (*cache.Item, bool, err
 func (r *Ristretto) Set(ctx context.Context, key string, item *cache.Item, ttl time.Duration) error {
 	// using # of rows as cost
 	_ = r.c.SetWithTTL(key, item, int64(len(item.Rows)), ttl)
+	return nil
+}
+
+// Invalidate removes the item from ristretto.
+func (r *Ristretto) Invalidate(ctx context.Context, key string) error {
+	r.c.Del(key)
 	return nil
 }
 

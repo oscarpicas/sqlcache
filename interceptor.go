@@ -8,7 +8,7 @@ import (
 	"time"
 
 	"github.com/ngrok/sqlmw"
-	"github.com/prashanthpai/sqlcache/cache"
+	"github.com/oscarpicas/sqlcache/cache"
 )
 
 // Config is the configuration passed to NewInterceptor for creating new
@@ -22,8 +22,8 @@ type Config struct {
 	// returns error. Since sqlcache package does not log any failures, you can
 	// use this hook to log errors or even choose to disable/bypass sqlcache.
 	OnError func(error)
-	// HashFunc can be optionally set to provide a custom hashing function. By
-	// default sqlcache uses mitchellh/hashstructure which internally uses FNV.
+	// HashFunc can be optionally set to provide a custom hashing function.
+	// By default, sqlcache uses mitchellh/hashstructure which internally uses FNV.
 	// If hash collision is a concern to you, consider using NoopHash.
 	HashFunc func(query string, args []driver.NamedValue) (string, error)
 }
@@ -54,8 +54,10 @@ func NewInterceptor(config *Config) (*Interceptor, error) {
 		config.HashFunc = defaultHashFunc
 	}
 
+	sCache := NewSyncCache(config.Cache)
+
 	return &Interceptor{
-		config.Cache,
+		sCache,
 		config.HashFunc,
 		config.OnError,
 		Stats{},
@@ -83,7 +85,7 @@ func (i *Interceptor) Disable() {
 	i.disabled = true
 }
 
-// StmtQueryContext intecepts database/sql's stmt.QueryContext calls from a prepared statement.
+// StmtQueryContext intercepts database/sql's stmt.QueryContext calls from a prepared statement.
 func (i *Interceptor) StmtQueryContext(ctx context.Context, conn driver.StmtQueryContext, query string, args []driver.NamedValue) (context.Context, driver.Rows, error) {
 
 	if i.disabled {
@@ -91,7 +93,16 @@ func (i *Interceptor) StmtQueryContext(ctx context.Context, conn driver.StmtQuer
 		return ctx, rows, err
 	}
 
-	attrs := getAttrs(query)
+	attrs, err := getAttrs(query)
+	if err != nil {
+		atomic.AddUint64(&i.stats.Errors, 1)
+		if i.onErr != nil {
+			i.onErr(fmt.Errorf("getAttrs failed: %w", err))
+		}
+		rows, err := conn.QueryContext(ctx, args)
+		return ctx, rows, err
+	}
+
 	if attrs == nil {
 		rows, err := conn.QueryContext(ctx, args)
 		return ctx, rows, err
@@ -130,7 +141,7 @@ func (i *Interceptor) StmtQueryContext(ctx context.Context, conn driver.StmtQuer
 	return ctx, rows, err
 }
 
-// ConnQueryContext intecepts database/sql's DB.QueryContext Conn.QueryContext calls.
+// ConnQueryContext intercepts database/sql's DB.QueryContext Conn.QueryContext calls.
 func (i *Interceptor) ConnQueryContext(ctx context.Context, conn driver.QueryerContext, query string, args []driver.NamedValue) (context.Context, driver.Rows, error) {
 
 	if i.disabled {
@@ -138,7 +149,16 @@ func (i *Interceptor) ConnQueryContext(ctx context.Context, conn driver.QueryerC
 		return ctx, rows, err
 	}
 
-	attrs := getAttrs(query)
+	attrs, err := getAttrs(query)
+	if err != nil {
+		atomic.AddUint64(&i.stats.Errors, 1)
+		if i.onErr != nil {
+			i.onErr(fmt.Errorf("getAttrs failed: %w", err))
+		}
+		rows, err := conn.QueryContext(ctx, query, args)
+		return ctx, rows, err
+	}
+
 	if attrs == nil {
 		rows, err := conn.QueryContext(ctx, query, args)
 		return ctx, rows, err

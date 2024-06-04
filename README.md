@@ -1,9 +1,9 @@
 # sqlcache
 
-[![Go.Dev reference](https://img.shields.io/badge/go.dev-reference-blue?logo=go)](https://pkg.go.dev/github.com/prashanthpai/sqlcache?tab=doc)
-[![Go Report Card](https://goreportcard.com/badge/github.com/prashanthpai/sqlcache?clear_cache=1)](https://goreportcard.com/report/github.com/prashanthpai/sqlcache)
-[![Test status](https://github.com/prashanthpai/sqlcache/workflows/test/badge.svg?branch=master "test status")](https://github.com/prashanthpai/sqlcache/actions)
-[![codecov](https://codecov.io/gh/prashanthpai/sqlcache/branch/master/graph/badge.svg)](https://codecov.io/gh/prashanthpai/sqlcache)
+[![Go.Dev reference](https://img.shields.io/badge/go.dev-reference-blue?logo=go)](https://pkg.go.dev/github.com/oscarpicas/sqlcache?tab=doc)
+[![Go Report Card](https://goreportcard.com/badge/github.com/oscarpicas/sqlcache?clear_cache=1)](https://goreportcard.com/report/github.com/oscarpicas/sqlcache)
+[![Test status](https://github.com/oscarpicas/sqlcache/workflows/test/badge.svg?branch=master "test status")](https://github.com/oscarpicas/sqlcache/actions)
+[![codecov](https://codecov.io/gh/oscarpicas/sqlcache/branch/master/graph/badge.svg)](https://codecov.io/gh/oscarpicas/sqlcache)
 [![MIT license](https://img.shields.io/badge/license-MIT-brightgreen.svg)](https://opensource.org/licenses/MIT)
 
 sqlcache is a caching middleware for `database/sql`
@@ -36,7 +36,7 @@ import (
 
 	"github.com/redis/go-redis/v9"
 	"github.com/jackc/pgx/v4/stdlib"
-	"github.com/prashanthpai/sqlcache"
+	"github.com/oscarpicas/sqlcache"
 )
 
 func main() {

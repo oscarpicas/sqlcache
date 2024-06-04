@@ -4,7 +4,7 @@ import (
 	"database/sql/driver"
 	"io"
 
-	"github.com/prashanthpai/sqlcache/cache"
+	"github.com/oscarpicas/sqlcache/cache"
 )
 
 // rowsCached implements driver.Rows interface
