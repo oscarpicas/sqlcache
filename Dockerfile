@@ -1,9 +1,6 @@
 # Start from the latest golang base image
 FROM golang:latest as builder
 
-# Add Maintainer Info
-LABEL maintainer="oscarpicas <oscarpicas@gmail.com>"
-
 # Set the Current Working Directory inside the container
 WORKDIR /app
 
@@ -16,6 +13,7 @@ RUN go mod download
 # Copy the source from the current directory to the Working Directory inside the container
 COPY . .
 
+# Install mockery
 RUN go install github.com/vektra/mockery/v2@latest
 
 # Run go generate on all packages
