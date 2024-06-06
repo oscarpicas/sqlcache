@@ -78,7 +78,7 @@ rows, err := db.QueryContext(context.TODO(), `
 	SELECT name, pages FROM books WHERE pages > $1`, 100)
 ```
 
-See [example/main.go](example/main.go) for a full working example.
+See [example/main.go](examples/main.go) for a full working example.
 
 ### References
 

@@ -16,9 +16,6 @@ tags
 .idea/
 *.iml
 
-# Binary
-example/example
-
 # mac
 .DS_Store
 
